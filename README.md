@@ -1,2 +1,2 @@
-# valorem-subgraph
-Secondary repo for the Valorem project subgraph
+# valorem-option-subgraph
+Subgraph for the Valorem Options Protocol

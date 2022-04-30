@@ -12,7 +12,7 @@ import {
   URI
 } from "../generated/OptionsSettlementEngine/OptionsSettlementEngine"
 
-import { Account, Balance, ExampleEntity, Option, Token, TokenRegistry, Transfer } from "../generated/schema"
+import { Account, Balance, Claim, ExampleEntity, Option, Token, TokenRegistry, Transfer } from "../generated/schema"
 
 import {
   TransferBatch as TransferBatchEvent,
@@ -164,7 +164,23 @@ export function handleApprovalForAll(event: ApprovalForAll): void {
   // - contract.write(...)
 }
 
-export function handleClaimRedeemed(event: ClaimRedeemed): void {}
+export function handleClaimRedeemed(event: ClaimRedeemed): void {
+  let claim = Claim.load(event.params.claimId.toString());
+
+  if (claim == null) {
+    claim = new Claim(event.params.claimId.toString());
+  }
+
+  // add data to claim
+  claim.option = event.params.optionId;
+  claim.redeemer = event.params.redeemer;
+  claim.exerciseAsset = event.params.exerciseAsset;
+  claim.underlyingAsset = event.params.underlyingAsset;
+  claim.exerciseAmount = event.params.exerciseAmount;
+  claim.underlyingAmount = event.params.underlyingAmount;
+
+  claim.save();
+}
 
 export function handleExerciseAssigned(event: ExerciseAssigned): void {}
 
@@ -177,7 +193,6 @@ export function handleNewChain(event: NewChain): void {
 
     if (option == null) {
         option = new Option(event.params.optionId.toString());
-        option.save();
     }
 
     option.underlyingAsset = event.params.underlyingAsset;
@@ -190,7 +205,18 @@ export function handleNewChain(event: NewChain): void {
     option.save();
 }
 
-export function handleOptionsExercised(event: OptionsExercised): void {}
+export function handleOptionsExercised(event: OptionsExercised): void {
+  let option = Option.load(event.params.optionId.toString());
+
+  if (option == null) {
+    option = new Option(event.params.optionId.toString());
+  }
+
+  option.exercisee = event.params.exercisee;
+  option.amount = event.params.amount;
+
+  option.save();
+}
 
 export function handleOptionsWritten(event: OptionsWritten): void {
   let option = Option.load(event.params.optionId.toString());
